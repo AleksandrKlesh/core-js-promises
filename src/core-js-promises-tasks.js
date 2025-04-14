@@ -19,7 +19,7 @@
  */
 function getPromise(number) {
   return new Promise((resolve, reject) => {
-    if (number > 0) {
+    if (number >= 0) {
       resolve(number);
     } else {
       reject(new Error('Error'));
@@ -99,9 +99,7 @@ function getFirstPromiseResult(promises) {
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)] => Promise rejected with 2
  */
 function getAllOrNothing(promises) {
-  return Promise.all(promises)
-    .then((value) => value)
-    .catch((value) => value);
+  return Promise.all(promises);
 }
 
 /**
@@ -116,8 +114,10 @@ function getAllOrNothing(promises) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with [1, null, 3]
  */
-function getAllResult(/* promises */) {
-  throw new Error('Not implemented');
+function getAllResult(promises) {
+  return Promise.all(
+    promises.map((promise) => promise.then((value) => value).catch(() => null))
+  );
 }
 
 /**
@@ -138,8 +138,12 @@ function getAllResult(/* promises */) {
  * [promise1, promise4, promise3] => Promise.resolved('104030')
  * [promise1, promise4, promise3, promise2] => Promise.resolved('10403020')
  */
-function queuePromises(/* promises */) {
-  throw new Error('Not implemented');
+function queuePromises(promises) {
+  return promises.reduce((acc, promise) => {
+    return acc.then((str) => {
+      return promise.then((number) => str + number);
+    });
+  }, Promise.resolve(''));
 }
 
 module.exports = {
